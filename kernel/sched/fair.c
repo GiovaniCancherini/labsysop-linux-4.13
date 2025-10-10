@@ -6064,7 +6064,7 @@ wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se)
 
 static void set_last_buddy(struct sched_entity *se)
 {
-	if (entity_is_task(se) && unlikely(task_of(se)->policy == SCHED_IDLE))
+	if (entity_is_task(se) && unlikely(idle_policy(task_of(se)->policy) || low_idle_policy(task_of(se)->policy)))
 		return;
 
 	for_each_sched_entity(se) {
@@ -6076,7 +6076,7 @@ static void set_last_buddy(struct sched_entity *se)
 
 static void set_next_buddy(struct sched_entity *se)
 {
-	if (entity_is_task(se) && unlikely(task_of(se)->policy == SCHED_IDLE))
+	if (entity_is_task(se) && unlikely(idle_policy(task_of(se)->policy) || low_idle_policy(task_of(se)->policy)))
 		return;
 
 	for_each_sched_entity(se) {
@@ -6133,9 +6133,16 @@ static void check_preempt_wakeup(struct rq *rq, struct task_struct *p, int wake_
 	if (test_tsk_need_resched(curr))
 		return;
 
-	/* Idle tasks are by definition preempted by non-idle tasks. */
+	/* 
+	* Idle tasks are preempted by any task except those of policy SCHED_LOW_IDLE.
+	* Low idle tasks are preempted by all other tasks.
+	*/
 	if (unlikely(curr->policy == SCHED_IDLE) &&
-	    likely(p->policy != SCHED_IDLE))
+		likely(p->policy != SCHED_IDLE && p->policy != SCHED_LOW_IDLE))
+		goto preempt;
+
+	if (unlikely(curr->policy == SCHED_LOW_IDLE) &&
+		likely(p->policy != SCHED_LOW_IDLE))
 		goto preempt;
 
 	/*
