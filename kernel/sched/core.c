@@ -739,19 +739,19 @@ static void set_load_weight(struct task_struct *p)
 	struct load_weight *load = &p->se.load;
 
 	/*
-	 * SCHED_IDLE tasks get minimal weight:
-	 */
-	if (idle_policy(p->policy)) {
-		load->weight = scale_load(WEIGHT_IDLEPRIO);
-		load->inv_weight = WMULT_IDLEPRIO;
-		return;
-	}
-	/*
 	* SCHED_LOW_IDLE tasks get even lower weight than SCHED_IDLE:
 	*/
 	if (idle_low_policy(p->policy)) {
 		load->weight = scale_load(WEIGHT_LOW_IDLEPRIO);
 		load->inv_weight = WMULT_LOW_IDLEPRIO;
+		return;
+	}
+	/*
+	 * SCHED_IDLE tasks get minimal weight:
+	 */
+	if (idle_policy(p->policy)) {
+		load->weight = scale_load(WEIGHT_IDLEPRIO);
+		load->inv_weight = WMULT_IDLEPRIO;
 		return;
 	}
 

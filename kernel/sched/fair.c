@@ -6064,7 +6064,7 @@ wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se)
 
 static void set_last_buddy(struct sched_entity *se)
 {
-	if (entity_is_task(se) && unlikely(idle_policy(task_of(se)->policy) || low_idle_policy(task_of(se)->policy)))
+	if (entity_is_task(se) && (unlikely(idle_policy(task_of(se)->policy)) || unlikely(idle_low_policy(task_of(se)->policy))))
 		return;
 
 	for_each_sched_entity(se) {
@@ -6076,7 +6076,7 @@ static void set_last_buddy(struct sched_entity *se)
 
 static void set_next_buddy(struct sched_entity *se)
 {
-	if (entity_is_task(se) && unlikely(idle_policy(task_of(se)->policy) || low_idle_policy(task_of(se)->policy)))
+	if (entity_is_task(se) && (unlikely(idle_policy(task_of(se)->policy)) || unlikely(idle_low_policy(task_of(se)->policy))))
 		return;
 
 	for_each_sched_entity(se) {
@@ -6541,7 +6541,7 @@ static int task_hot(struct task_struct *p, struct lb_env *env)
 	if (p->sched_class != &fair_sched_class)
 		return 0;
 
-	if (unlikely(p->policy == SCHED_IDLE))
+	if (unlikely(p->policy == SCHED_IDLE) || unlikely(p->policy == SCHED_LOW_IDLE))
 		return 0;
 
 	/*
